@@ -46,10 +46,30 @@ void AKnightCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	}
 }
 
+void AKnightCharacter::UpdateKnightFacingDirection(float Direction)
+{
+	if (Controller)
+	{
+		FRotator CurrentRotation = Controller->GetControlRotation();
+		if (Direction < 0.0f && CurrentRotation.Yaw != 180.0f)
+		{
+			Controller->SetControlRotation(FRotator(CurrentRotation.Pitch, 180.0f, CurrentRotation.Roll));
+		}
+		else if (Direction > 0.0f && CurrentRotation.Yaw != 0.0f)
+		{
+			Controller->SetControlRotation(FRotator(CurrentRotation.Pitch, 0.0f, CurrentRotation.Roll));
+		}
+	}
+
+}
+
 void AKnightCharacter::Move(const FInputActionValue& Value)
 {
 	if(bCanMove && bIsActive)
+	{
 		AddMovementInput(FVector(1.0f,0.0f,0.0f), Value.Get<float>());
+		UpdateKnightFacingDirection(Value.Get<float>());
+	}
 }
 
 void AKnightCharacter::Attack(const FInputActionValue& Value)

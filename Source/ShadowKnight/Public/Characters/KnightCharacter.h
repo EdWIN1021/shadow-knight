@@ -49,6 +49,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
+	void UpdateKnightFacingDirection(float Direction); 
 	void Move(const FInputActionValue &Value);
 	void Attack(const FInputActionValue &Value);
 	void BeginJump(const FInputActionValue &Value);

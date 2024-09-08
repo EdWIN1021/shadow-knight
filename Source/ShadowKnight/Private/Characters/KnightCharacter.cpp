@@ -1,19 +1,21 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Characters/KnightCharacter.h"
+
+#include "Characters/Enemy.h"
 
 AKnightCharacter::AKnightCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// create a SpringArm
+	// Create a SpringArm
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-
-	// attach the ViewCamera to SpringArm
+ 
+	// Attach the ViewCamera to SpringArm
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+ 
+	AttackCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollisionBox"));
+	AttackCollisionBox->SetupAttachment(RootComponent);
 }
 
 void AKnightCharacter::BeginPlay()
@@ -26,7 +28,9 @@ void AKnightCharacter::BeginPlay()
 			Subsystem->AddMappingContext(MappingContext, 0);
 		}
 	}
-	AnimationOverrideEndSignature.BindUObject(this, &AKnightCharacter::OnAttackAnimationComplete);
+	AttackAnimDelegate.BindUObject(this, &AKnightCharacter::OnAttackAnimationComplete);
+	AttackCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AKnightCharacter::AKnightCharacter::AttackCollisionBoxBeginOverlap);
+	EnableAttackCollisionBox(false);
 }
 
 void AKnightCharacter::Tick(float DeltaTime)
@@ -61,26 +65,30 @@ void AKnightCharacter::UpdateKnightFacingDirection(float Direction)
 			Controller->SetControlRotation(FRotator(CurrentRotation.Pitch, 0.0f, CurrentRotation.Roll));
 		}
 	}
-
 }
 
 void AKnightCharacter::Move(const FInputActionValue& Value)
 {
-	if(bCanMove && bIsAlive)
+	if (bCanMove && bIsAlive)
 	{
-		AddMovementInput(FVector(1.0f,0.0f,0.0f), Value.Get<float>());
+		AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value.Get<float>());
 		UpdateKnightFacingDirection(Value.Get<float>());
 	}
 }
 
 void AKnightCharacter::Attack(const FInputActionValue& Value)
 {
-	if(bIsAlive && bCanAttack)
+	if (bIsAlive && bCanAttack)
 	{
 		bCanAttack = false;
 		bCanMove = false;
 
-		GetAnimInstance()->PlayAnimationOverride(AnimSequence, FName("DefaultSlot"), 1.0f, 0.0f, AnimationOverrideEndSignature);
+		EnableAttackCollisionBox(true);
+
+		if (UPaperZDAnimInstance* AnimInstance = GetAnimInstance())
+		{
+			AnimInstance->PlayAnimationOverride(AnimSequence, FName("DefaultSlot"), 1.0f, 0.0f, AttackAnimDelegate);
+		}
 	}
 }
 
@@ -88,11 +96,35 @@ void AKnightCharacter::OnAttackAnimationComplete(bool Completed)
 {
 	bCanAttack = true;
 	bCanMove = true;
+	EnableAttackCollisionBox(false);
+}
+
+void AKnightCharacter::AttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AEnemy* Enemy = Cast<AEnemy>(OtherActor);
+	if(Enemy)
+	{
+		 GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::White, Enemy->GetName());
+	}
+}
+
+void AKnightCharacter::EnableAttackCollisionBox(bool Enabled)
+{
+	if(Enabled)
+	{
+		AttackCollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		AttackCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	}
+	else {
+		AttackCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		AttackCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	}
 }
 
 void AKnightCharacter::BeginJump(const FInputActionValue& Value)
 {
-	if(bCanMove && bIsAlive)
+	if (bCanMove && bIsAlive)
 		Jump();
 }
 
@@ -100,5 +132,3 @@ void AKnightCharacter::EndJump(const FInputActionValue& Value)
 {
 	StopJumping();
 }
-
-

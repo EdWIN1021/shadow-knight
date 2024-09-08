@@ -9,6 +9,7 @@
 #include "InputActionValue.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
+#include "Components/BoxComponent.h"
 #include "KnightCharacter.generated.h"
 
 /**
@@ -30,6 +31,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	TObjectPtr<UCameraComponent> ViewCamera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite);
+	TObjectPtr<UBoxComponent> AttackCollisionBox;
+	
 	/** Input mapping context for enhanced input system */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputMappingContext> MappingContext;
@@ -50,6 +54,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 	TObjectPtr<UPaperZDAnimSequence> AnimSequence;
 
+	/** Delegate to handle the end of attack animation */
+	FZDOnAnimationOverrideEndSignature AttackAnimDelegate;
+	
 	/** Determines if the knight is active and accepting input */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	bool bIsAlive = true;
@@ -61,9 +68,6 @@ public:
 	/** Determines if the knight can attack */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	bool bCanAttack = true;
-
-	/** Delegate to handle the end of attack animation */
-	FZDOnAnimationOverrideEndSignature AnimationOverrideEndSignature;
 
 protected:
 	virtual void BeginPlay() override;
@@ -85,5 +89,13 @@ protected:
 	/** Handles the knight's jump end */
 	void EndJump(const FInputActionValue& Value);
 
+	/** Called when an attack animation completes */ 
 	void OnAttackAnimationComplete(bool Completed);
+
+	UFUNCTION()
+	void AttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+							 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+							 const FHitResult& SweepResult);
+	UFUNCTION(BlueprintCallable)
+	void EnableAttackCollisionBox(bool Enabled);
 };

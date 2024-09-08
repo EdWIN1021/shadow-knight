@@ -29,7 +29,7 @@ void AKnightCharacter::BeginPlay()
 		}
 	}
 	AttackAnimDelegate.BindUObject(this, &AKnightCharacter::OnAttackAnimationComplete);
-	AttackCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AKnightCharacter::AKnightCharacter::AttackCollisionBoxBeginOverlap);
+	AttackCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AKnightCharacter::AKnightCharacter::OnAttackCollisionBoxBeginOverlap);
 	EnableAttackCollisionBox(false);
 }
 
@@ -99,7 +99,7 @@ void AKnightCharacter::OnAttackAnimationComplete(bool Completed)
 	EnableAttackCollisionBox(false);
 }
 
-void AKnightCharacter::AttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void AKnightCharacter::OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AEnemy* Enemy = Cast<AEnemy>(OtherActor);

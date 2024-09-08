@@ -10,6 +10,9 @@ AEnemy::AEnemy()
     // Create and initialize the proximity sphere component
     ProximitySphere = CreateDefaultSubobject<USphereComponent>(TEXT("ProximitySphere"));
     ProximitySphere->SetupAttachment(RootComponent);
+
+    HPText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("HP"));
+    HPText ->SetupAttachment(RootComponent);
 }
 
 void AEnemy::BeginPlay()
@@ -19,6 +22,7 @@ void AEnemy::BeginPlay()
     // Bind overlap events to the proximity sphere
     ProximitySphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnKnightEnterSphere);
     ProximitySphere->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnKnightLeaveSphere);
+    UpdateCurrentHP(CurrentHP);
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -48,6 +52,13 @@ bool AEnemy::ShouldFollowTarget() const
     // Check if the enemy should stop based on the stop distance
     return DistanceToTarget > StopDistanceToTarget;
 }
+
+void AEnemy::UpdateCurrentHP(int HP)
+{
+    CurrentHP = HP;
+    HPText->SetText(FText::FromString(FString::Printf(TEXT("HP: %d"), CurrentHP)));
+}
+
 
 void AEnemy::MoveTowardsTarget()
 {

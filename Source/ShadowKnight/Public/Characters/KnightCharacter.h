@@ -1,18 +1,19 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "PaperZDCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "PaperZDAnimInstance.h"
 #include "InputActionValue.h"
 #include "GameFramework/Controller.h"
+#include "EnhancedInputComponent.h"
 #include "KnightCharacter.generated.h"
 
-
+/**
+ * AKnightCharacter represents the player character with movement, attack, and animation capabilities.
+ */
 UCLASS()
 class SHADOWKNIGHT_API AKnightCharacter : public APaperZDCharacter
 {
@@ -21,37 +22,68 @@ class SHADOWKNIGHT_API AKnightCharacter : public APaperZDCharacter
 public:
 	AKnightCharacter();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	/** SpringArm for positioning the camera behind the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	TObjectPtr<USpringArmComponent> CameraBoom;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	/** Side-scrolling camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	TObjectPtr<UCameraComponent> ViewCamera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	/** Input mapping context for enhanced input system */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputMappingContext> MappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	/** Input action for movement */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	/** Input action for attack */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> AttackAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	/** Input action for jumping */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsActive = true;
+	/** The animation sequence for attacks */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
+	TObjectPtr<UPaperZDAnimSequence> AnimSequence;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	/** Determines if the knight is active and accepting input */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	bool bIsAlive = true;
+
+	/** Determines if the knight can move */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	bool bCanMove = true;
-	
+
+	/** Determines if the knight can attack */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	bool bCanAttack = true;
+
+	/** Delegate to handle the end of attack animation */
+	FZDOnAnimationOverrideEndSignature AnimationOverrideEndSignature;
+
+protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-	void UpdateKnightFacingDirection(float Direction); 
-	void Move(const FInputActionValue &Value);
-	void Attack(const FInputActionValue &Value);
-	void BeginJump(const FInputActionValue &Value);
-	void EndJump(const FInputActionValue &Value);
+	/** Update the knight's facing direction based on movement input */
+	void UpdateKnightFacingDirection(float Direction);
+
+	/** Handles the knight's movement input */
+	void Move(const FInputActionValue& Value);
+
+	/** Handles the knight's attack input */
+	void Attack(const FInputActionValue& Value);
+
+	/** Handles the knight's jump start */
+	void BeginJump(const FInputActionValue& Value);
+
+	/** Handles the knight's jump end */
+	void EndJump(const FInputActionValue& Value);
+
+	void OnAttackAnimationComplete(bool Completed);
 };

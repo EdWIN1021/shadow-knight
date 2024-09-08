@@ -37,6 +37,9 @@ protected:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	
+	void MoveTowardsTarget();
+	void UpdateEnemyFacingDirection(float Direction); 
 
 private:
 	/** Handles when a player enters the proximity sphere. */
@@ -50,6 +53,5 @@ private:
 							 UPrimitiveComponent* OtherComp,int32 OtherBodyIndex);
 
 	bool ShouldFollowTarget() const;
-	void MoveTowardsTarget();
-	void UpdateEnemyFacingDirection(float Direction); 
+	
 };

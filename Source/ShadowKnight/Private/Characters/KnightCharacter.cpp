@@ -26,6 +26,7 @@ void AKnightCharacter::BeginPlay()
 			Subsystem->AddMappingContext(MappingContext, 0);
 		}
 	}
+	AnimationOverrideEndSignature.BindUObject(this, &AKnightCharacter::OnAttackAnimationComplete);
 }
 
 void AKnightCharacter::Tick(float DeltaTime)
@@ -65,7 +66,7 @@ void AKnightCharacter::UpdateKnightFacingDirection(float Direction)
 
 void AKnightCharacter::Move(const FInputActionValue& Value)
 {
-	if(bCanMove && bIsActive)
+	if(bCanMove && bIsAlive)
 	{
 		AddMovementInput(FVector(1.0f,0.0f,0.0f), Value.Get<float>());
 		UpdateKnightFacingDirection(Value.Get<float>());
@@ -74,12 +75,24 @@ void AKnightCharacter::Move(const FInputActionValue& Value)
 
 void AKnightCharacter::Attack(const FInputActionValue& Value)
 {
-	
+	if(bIsAlive && bCanAttack)
+	{
+		bCanAttack = false;
+		bCanMove = false;
+
+		GetAnimInstance()->PlayAnimationOverride(AnimSequence, FName("DefaultSlot"), 1.0f, 0.0f, AnimationOverrideEndSignature);
+	}
+}
+
+void AKnightCharacter::OnAttackAnimationComplete(bool Completed)
+{
+	bCanAttack = true;
+	bCanMove = true;
 }
 
 void AKnightCharacter::BeginJump(const FInputActionValue& Value)
 {
-	if(bCanMove && bIsActive)
+	if(bCanMove && bIsAlive)
 		Jump();
 }
 
@@ -87,3 +100,5 @@ void AKnightCharacter::EndJump(const FInputActionValue& Value)
 {
 	StopJumping();
 }
+
+

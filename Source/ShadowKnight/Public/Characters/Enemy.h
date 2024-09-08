@@ -49,5 +49,7 @@ private:
 	void OnKnightLeaveSphere(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 							 UPrimitiveComponent* OtherComp,int32 OtherBodyIndex);
 
-	bool ShouldFollowTarget();
+	bool ShouldFollowTarget() const;
+	void MoveTowardsTarget();
+	void UpdateEnemyFacingDirection(float Direction); 
 };

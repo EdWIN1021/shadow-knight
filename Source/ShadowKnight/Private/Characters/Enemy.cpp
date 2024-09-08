@@ -10,14 +10,13 @@ AEnemy::AEnemy()
     // Create and initialize the proximity sphere component
     ProximitySphere = CreateDefaultSubobject<USphereComponent>(TEXT("ProximitySphere"));
     ProximitySphere->SetupAttachment(RootComponent);
-    
 }
 
 void AEnemy::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Bind overlap events to proximity sphere
+    // Bind overlap events to the proximity sphere
     ProximitySphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnKnightEnterSphere);
     ProximitySphere->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnKnightLeaveSphere);
 }
@@ -26,35 +25,61 @@ void AEnemy::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if(ShouldFollowTarget())
+    if (ShouldFollowTarget())
     {
-        if (bIsAlive && Target && bCanMove)
-        {
-            // Calculate facing direction (1 if target is to the right, -1 if left)
-            float FacingDirection = (Target->GetActorLocation().X - GetActorLocation().X) > 0.0f ? 1.0f : -1.0f;
-
-            // Add movement input towards the target
-            AddMovementInput(FVector(1.0f, 0.0f, 0.0f), FacingDirection);
-        }
-    } else
+        MoveTowardsTarget();
+    }
+    else
     {
-        //Attack
+        // Perform attack or other action when not following the target
     }
 }
 
-bool AEnemy::ShouldFollowTarget()
+bool AEnemy::ShouldFollowTarget() const
 {
-    bool Result = false;
-    if(Target)
+    if (!Target || !bIsAlive || !bCanMove)
     {
-        float DistanceToTarget = abs(Target->GetActorLocation().X - GetActorLocation().X);
-        Result = DistanceToTarget > StopDistanceToTarget;
+        return false;
     }
-    return  Result;
+
+    // Calculate the distance to the target
+    float DistanceToTarget = FVector::Dist(GetActorLocation(), Target->GetActorLocation());
+
+    // Check if the enemy should stop based on the stop distance
+    return DistanceToTarget > StopDistanceToTarget;
 }
+
+void AEnemy::MoveTowardsTarget()
+{
+    if (Target)
+    {
+        // Determine the direction (1 for right, -1 for left)
+        float FacingDirection = (Target->GetActorLocation().X - GetActorLocation().X) > 0.0f ? 1.0f : -1.0f;
+        UpdateEnemyFacingDirection(FacingDirection);
+        
+        // Move in the direction of the target
+        AddMovementInput(FVector(1.0f, 0.0f, 0.0f), FacingDirection);
+    }
+}
+
+void AEnemy::UpdateEnemyFacingDirection(float Direction)
+{
+    FRotator CurrentRotation = GetActorRotation(); 
+
+    if (Direction < 0.0f && CurrentRotation.Yaw != 180.0f)
+    {
+        SetActorRotation(FRotator(CurrentRotation.Pitch, 180.0f, CurrentRotation.Roll));
+    }
+    else if (Direction > 0.0f && CurrentRotation.Yaw != 0.0f)
+    {
+        SetActorRotation(FRotator(CurrentRotation.Pitch, 0.0f, CurrentRotation.Roll));
+    }
+}
+
 
 void AEnemy::OnKnightEnterSphere(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                 const FHitResult& SweepResult)
 {
     if (!OtherActor || OtherActor == this)
     {
@@ -73,11 +98,9 @@ void AEnemy::OnKnightEnterSphere(UPrimitiveComponent* OverlappedComponent, AActo
 void AEnemy::OnKnightLeaveSphere(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                  UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+    // If the actor leaving is the current target, clear the target
     if (OtherActor == Target)
     {
-        // Clear the target when the player leaves the sphere
         Target = nullptr;
     }
 }
-
-

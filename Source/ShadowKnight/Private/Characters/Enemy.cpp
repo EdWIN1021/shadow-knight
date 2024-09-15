@@ -29,7 +29,7 @@ void AEnemy::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (ShouldFollowTarget())
+    if (bIsAlive && ShouldFollowTarget() && !bIsStunned)
     {
         MoveTowardsTarget();
     }
@@ -98,10 +98,12 @@ void AEnemy::ApplyDamage(int Amount, float StunDuration)
         HPText->SetHiddenInGame(true);
         bIsAlive = false;
         bCanMove = false;
+        GetAnimInstance()->JumpToNode(FName("JumpToDie"), FName("SkeletonState"));
     }
     else
     {
-        
+        Stun(StunDuration);
+        GetAnimInstance()->JumpToNode(FName("JumpToHit"), FName("SkeletonState"));
     }
 }
 

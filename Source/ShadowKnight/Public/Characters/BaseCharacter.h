@@ -13,5 +13,4 @@ UCLASS()
 class SHADOWKNIGHT_API ABaseCharacter : public APaperZDCharacter
 {
 	GENERATED_BODY()
-	
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EnemyCharacter.h"
 #include "KnightCharacter.h"
 #include "PaperZDCharacter.h"
 #include "Components/SphereComponent.h"
@@ -10,7 +11,7 @@
  * Enemy class for handling enemy behavior including player detection and movement.
  */
 UCLASS()
-class SHADOWKNIGHT_API AEnemy : public ABaseCharacter
+class SHADOWKNIGHT_API AEnemy : public AEnemyCharacter
 {
 	GENERATED_BODY()
 

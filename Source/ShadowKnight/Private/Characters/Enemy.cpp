@@ -87,6 +87,23 @@ void AEnemy::UpdateEnemyFacingDirection(float Direction)
     }
 }
 
+void AEnemy::ApplyDamage(int Amount, float StunDuration)
+{
+    if(!bIsAlive) return;
+    UpdateCurrentHP(CurrentHP - Amount);
+
+    if(CurrentHP <= 0)
+    {
+        UpdateCurrentHP(0);
+        HPText->SetHiddenInGame(true);
+        bIsAlive = false;
+        bCanMove = false;
+    }
+    else
+    {
+        
+    }
+}
 
 void AEnemy::OnKnightEnterSphere(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                  UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,

@@ -1,13 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BaseCharacter.h"
 #include "PaperZDCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "PaperZDAnimInstance.h"
 #include "InputActionValue.h"
-#include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "Components/BoxComponent.h"
 #include "KnightCharacter.generated.h"
@@ -16,7 +16,7 @@
  * AKnightCharacter represents the player character with movement, attack, and animation capabilities.
  */
 UCLASS()
-class SHADOWKNIGHT_API AKnightCharacter : public APaperZDCharacter
+class SHADOWKNIGHT_API AKnightCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -56,7 +56,13 @@ public:
 
 	/** Delegate to handle the end of attack animation */
 	FZDOnAnimationOverrideEndSignature AttackAnimDelegate;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int AttackDamage = 25;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AttackStunDuration = 0.3f;
+		
 	/** Determines if the knight is active and accepting input */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	bool bIsAlive = true;

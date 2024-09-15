@@ -10,7 +10,7 @@
  * Enemy class for handling enemy behavior including player detection and movement.
  */
 UCLASS()
-class SHADOWKNIGHT_API AEnemy : public APaperZDCharacter
+class SHADOWKNIGHT_API AEnemy : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -36,6 +36,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	int CurrentHP = 100;
 	
+	void ApplyDamage(int Amount, float StunDuration);
 
 protected:
 	/** Proximity sphere used for detecting players. */
@@ -47,7 +48,7 @@ protected:
 	
 	void MoveTowardsTarget();
 	void UpdateEnemyFacingDirection(float Direction); 
-
+	
 private:
 	/** Handles when a player enters the proximity sphere. */
 	UFUNCTION()

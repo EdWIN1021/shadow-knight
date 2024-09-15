@@ -105,7 +105,7 @@ void AKnightCharacter::OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* Ove
 	AEnemy* Enemy = Cast<AEnemy>(OtherActor);
 	if(Enemy)
 	{
-		 GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::White, Enemy->GetName());
+		Enemy->ApplyDamage(AttackDamage, AttackStunDuration);
 	}
 }
 

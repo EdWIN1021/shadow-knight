@@ -87,7 +87,7 @@ void AKnightCharacter::Attack(const FInputActionValue& Value)
 
 		if (UPaperZDAnimInstance* AnimInstance = GetAnimInstance())
 		{
-			AnimInstance->PlayAnimationOverride(AnimSequence, FName("DefaultSlot"), 1.0f, 0.0f, AttackAnimDelegate);
+			AnimInstance->PlayAnimationOverride(AttackAnim, FName("DefaultSlot"), 1.0f, 0.0f, AttackAnimDelegate);
 		}
 	}
 }

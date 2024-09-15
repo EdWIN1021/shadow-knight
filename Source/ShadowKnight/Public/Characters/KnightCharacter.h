@@ -2,11 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
-#include "PaperZDCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "PaperZDAnimInstance.h"
 #include "InputActionValue.h"
 #include "EnhancedInputComponent.h"
 #include "Components/BoxComponent.h"
@@ -50,30 +48,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
 
-	/** The animation sequence for attacks */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
-	TObjectPtr<UPaperZDAnimSequence> AnimSequence;
-
-	/** Delegate to handle the end of attack animation */
-	FZDOnAnimationOverrideEndSignature AttackAnimDelegate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int AttackDamage = 25;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AttackStunDuration = 0.3f;
-		
-	/** Determines if the knight is active and accepting input */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
-	bool bIsAlive = true;
-
-	/** Determines if the knight can move */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
-	bool bCanMove = true;
-
-	/** Determines if the knight can attack */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
-	bool bCanAttack = true;
 
 protected:
 	virtual void BeginPlay() override;
@@ -94,6 +74,10 @@ protected:
 
 	/** Handles the knight's jump end */
 	void EndJump(const FInputActionValue& Value);
+
+
+
+	
 
 	/** Called when an attack animation completes */ 
 	void OnAttackAnimationComplete(bool Completed);

@@ -7,7 +7,6 @@
 #include "PaperZDCharacter.h"
 #include "AnimSequences/PaperZDAnimSequence.h"
 #include "Components/BoxComponent.h"
-#include "Components/TextRenderComponent.h"
 #include "BaseCharacter.generated.h"
 
 /**
@@ -54,7 +53,7 @@ public:
 
 	void ApplyDamage(int Amount, float StunDuration);
 	
-	void UpdateCurrentHP(float HP);
+	virtual void UpdateCurrentHP(float HP);
 
 	virtual void BeginPlay() override;
 	

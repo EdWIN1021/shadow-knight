@@ -7,6 +7,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "EnhancedInputComponent.h"
+#include "ShadowKnightGameInstance.h"
+#include "Items/Item.h"
 #include "KnightCharacter.generated.h"
 
 /**
@@ -37,6 +39,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UShadowKnightGameInstance* ShadowKnightGameInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* PickUpSound;
+	
+	void CollectItem(EItemType Type);
+	virtual void UpdateCurrentHP(float HP) override;
 	
 protected:
 	virtual void BeginPlay() override;

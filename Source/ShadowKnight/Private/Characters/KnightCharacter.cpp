@@ -1,5 +1,6 @@
 #include "Characters/KnightCharacter.h"
 #include "Characters/EnemyCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 
 AKnightCharacter::AKnightCharacter()
@@ -29,7 +30,41 @@ void AKnightCharacter::BeginPlay()
 	AttackAnimDelegate.BindUObject(this, &AKnightCharacter::OnAttackAnimationComplete);
 	AttackCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AKnightCharacter::AKnightCharacter::OnAttackCollisionBoxBeginOverlap);
 	EnableAttackCollisionBox(false);
+
+	ShadowKnightGameInstance = Cast<UShadowKnightGameInstance>(GetGameInstance());
+	if(ShadowKnightGameInstance)
+	{
+		CurrentHP = ShadowKnightGameInstance->PlayerHP;
+	}
 }
+
+void AKnightCharacter::CollectItem(EItemType Type)
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), PickUpSound);
+
+	switch (Type)
+	{
+		case EItemType::Key:
+			break; 
+		
+	    case EItemType::HealthPotion:
+			break;
+
+		default:
+			break;
+	}
+}
+
+void AKnightCharacter::UpdateCurrentHP(float HP)
+{
+	Super::UpdateCurrentHP(HP);
+	if (ShadowKnightGameInstance)
+	{
+		ShadowKnightGameInstance->SetPlayerHP(CurrentHP);
+	}
+}
+
+
 
 void AKnightCharacter::Tick(float DeltaTime)
 {

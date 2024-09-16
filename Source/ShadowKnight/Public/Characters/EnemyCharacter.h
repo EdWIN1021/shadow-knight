@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "KnightCharacter.h"
 #include "Characters/BaseCharacter.h"
+#include "Components/SphereComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "EnemyCharacter.generated.h"
 
@@ -57,5 +58,18 @@ public:
 	void OnStunTimeout();
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USphereComponent> ProximitySphere;
+	
 	virtual void BeginPlay() override;
+
+private:
+	UFUNCTION()
+	void OnKnightEnterSphere(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+							 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+							 const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnKnightLeaveSphere(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+							 UPrimitiveComponent* OtherComp,int32 OtherBodyIndex);
 };

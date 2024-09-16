@@ -16,18 +16,18 @@ class SHADOWKNIGHT_API ABaseCharacter : public APaperZDCharacter
 {
 	GENERATED_BODY()
 
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
-	TObjectPtr<UPaperZDAnimSequence> AttackAnim;
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status")
+	bool bIsAlive = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	bool bCanAttack = true;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status")
-	bool bIsAlive = true;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Status")
 	bool bCanMove = true; 
-	
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
+	TObjectPtr<UPaperZDAnimSequence> AttackAnim;
 	FZDOnAnimationOverrideEndSignature AttackAnimDelegate;
 };

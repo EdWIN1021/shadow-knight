@@ -75,10 +75,6 @@ protected:
 	/** Handles the knight's jump end */
 	void EndJump(const FInputActionValue& Value);
 
-
-
-	
-
 	/** Called when an attack animation completes */ 
 	void OnAttackAnimationComplete(bool Completed);
 

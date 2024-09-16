@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "EnemyCharacter.h"
-#include "Characters/Enemy.h"
 #include "BossCharacter.generated.h"
 
 /**
@@ -14,5 +13,4 @@ UCLASS()
 class SHADOWKNIGHT_API ABossCharacter : public AEnemyCharacter
 {
 	GENERATED_BODY()
-	
 };

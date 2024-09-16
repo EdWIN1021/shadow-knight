@@ -14,5 +14,4 @@ UCLASS()
 class SHADOWKNIGHT_API ASkeletonCharacter : public AEnemyCharacter
 {
 	GENERATED_BODY()
-	
 };

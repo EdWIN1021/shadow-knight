@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "KnightCharacter.h"
 #include "Characters/BaseCharacter.h"
+#include "Components/TextRenderComponent.h"
 #include "EnemyCharacter.generated.h"
 
 /**
@@ -17,10 +18,15 @@ class SHADOWKNIGHT_API AEnemyCharacter : public ABaseCharacter
 
 public:
 	AEnemyCharacter();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UTextRenderComponent> HPText;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	int CurrentHP = 100;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AttackCoolDown = 3.0f;
-
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<AKnightCharacter> Target;
@@ -30,6 +36,8 @@ public:
 	
 	FTimerHandle AttackCoolDownTimer;
 
+	void UpdateCurrentHP(int HP);
+
 	void Attack();
 	void OnAttackCoolDownTimeout();
 	void OnAttackOverrideAnimEnd(bool Completed);
@@ -38,9 +46,9 @@ public:
 	void MoveTowardsTarget();
 	void UpdateEnemyFacingDirection(float Direction); 
 
+	void ApplyDamage(int Amount, float StunDuration);
 	virtual void Tick(float DeltaTime) override;
 	
-	// ---------
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsStunned = false;
 	
@@ -48,4 +56,6 @@ public:
 	void Stun(float Duration);
 	void OnStunTimeout();
 
+protected:
+	virtual void BeginPlay() override;
 };

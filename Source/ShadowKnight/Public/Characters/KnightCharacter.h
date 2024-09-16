@@ -7,7 +7,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "EnhancedInputComponent.h"
-#include "Components/BoxComponent.h"
 #include "KnightCharacter.generated.h"
 
 /**
@@ -38,9 +37,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite);
-	TObjectPtr<UBoxComponent> AttackCollisionBox;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -60,11 +56,4 @@ protected:
 	void EndJump(const FInputActionValue& Value);
 
 	void OnAttackAnimationComplete(bool Completed);
-
-	UFUNCTION()
-	void OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-							 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-							 const FHitResult& SweepResult);
-	UFUNCTION(BlueprintCallable)
-	void EnableAttackCollisionBox(bool Enabled);
 };

@@ -6,6 +6,7 @@
 #include "PaperZDAnimInstance.h"
 #include "PaperZDCharacter.h"
 #include "AnimSequences/PaperZDAnimSequence.h"
+#include "Components/BoxComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "BaseCharacter.generated.h"
 
@@ -38,12 +39,36 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float AttackStunDuration = 0.3f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	bool bIsStunned = false;
+	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UTextRenderComponent> HPText;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite);
+	TObjectPtr<UBoxComponent> AttackCollisionBox;
+
+	FTimerHandle StunTimer;
+	void Stun(float Duration);
+	void OnStunTimeout();
+
+	void ApplyDamage(int Amount, float StunDuration);
 	
 	void UpdateCurrentHP(int HP);
+
+	virtual void BeginPlay() override;
+	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 	TObjectPtr<UPaperZDAnimSequence> AttackAnim;
 	FZDOnAnimationOverrideEndSignature AttackAnimDelegate;
+
+	UFUNCTION()
+	void OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+							 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+							 const FHitResult& SweepResult);
+	
+	UFUNCTION(BlueprintCallable)
+	void EnableAttackCollisionBox(bool Enabled);
 };

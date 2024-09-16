@@ -13,9 +13,6 @@ AKnightCharacter::AKnightCharacter()
 	// Attach the ViewCamera to SpringArm
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
- 
-	AttackCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollisionBox"));
-	AttackCollisionBox->SetupAttachment(RootComponent);
 }
 
 void AKnightCharacter::BeginPlay()
@@ -28,6 +25,7 @@ void AKnightCharacter::BeginPlay()
 			Subsystem->AddMappingContext(MappingContext, 0);
 		}
 	}
+
 	AttackAnimDelegate.BindUObject(this, &AKnightCharacter::OnAttackAnimationComplete);
 	AttackCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AKnightCharacter::AKnightCharacter::OnAttackCollisionBoxBeginOverlap);
 	EnableAttackCollisionBox(false);
@@ -69,7 +67,7 @@ void AKnightCharacter::UpdateKnightFacingDirection(float Direction)
 
 void AKnightCharacter::Move(const FInputActionValue& Value)
 {
-	if (bCanMove && bIsAlive)
+	if (bCanMove && bIsAlive && !bIsStunned)
 	{
 		AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value.Get<float>());
 		UpdateKnightFacingDirection(Value.Get<float>());
@@ -78,7 +76,7 @@ void AKnightCharacter::Move(const FInputActionValue& Value)
 
 void AKnightCharacter::Attack(const FInputActionValue& Value)
 {
-	if (bIsAlive && bCanAttack)
+	if (bIsAlive && bCanAttack && !bIsStunned)
 	{
 		bCanAttack = false;
 		bCanMove = false;
@@ -97,29 +95,6 @@ void AKnightCharacter::OnAttackAnimationComplete(bool Completed)
 	bCanAttack = true;
 	bCanMove = true;
 	EnableAttackCollisionBox(false);
-}
-
-void AKnightCharacter::OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(OtherActor);
-	if(Enemy)
-	{
-		Enemy->ApplyDamage(AttackDamage, AttackStunDuration);
-	}
-}
-
-void AKnightCharacter::EnableAttackCollisionBox(bool Enabled)
-{
-	if(Enabled)
-	{
-		AttackCollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		AttackCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-	}
-	else {
-		AttackCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		AttackCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	}
 }
 
 void AKnightCharacter::BeginJump(const FInputActionValue& Value)

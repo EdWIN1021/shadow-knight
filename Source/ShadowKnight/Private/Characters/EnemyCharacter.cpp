@@ -10,9 +10,6 @@ AEnemyCharacter::AEnemyCharacter()
 	
 	ProximitySphere = CreateDefaultSubobject<USphereComponent>(TEXT("ProximitySphere"));
 	ProximitySphere->SetupAttachment(RootComponent);
-
-	AttackCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollisionBox"));
-	AttackCollisionBox->SetupAttachment(RootComponent);
 }
 
 void AEnemyCharacter::BeginPlay()
@@ -20,32 +17,10 @@ void AEnemyCharacter::BeginPlay()
 	Super::BeginPlay();
 	ProximitySphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnKnightEnterSphere);
 	ProximitySphere->OnComponentEndOverlap.AddDynamic(this, &AEnemyCharacter::OnKnightLeaveSphere);
-	UpdateCurrentHP(CurrentHP);
+
+
 	AttackAnimDelegate.BindUObject(this, &AEnemyCharacter::OnAttackOverrideAnimEnd);
 	AttackCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnAttackCollisionBoxBeginOverlap);
-}
-
-void AEnemyCharacter::OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	AKnightCharacter* Knight = Cast<AKnightCharacter>(OtherActor);
-	if(Knight)
-	{
-		// Knight->ApplyDamage(AttackDamage, AttackStunDuration);
-	}
-}
-
-void AEnemyCharacter::EnableAttackCollisionBox(bool Enabled)
-{
-	if(Enabled)
-	{
-		AttackCollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		AttackCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-	}
-	else {
-		AttackCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		AttackCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	}
 }
 
 void AEnemyCharacter::OnKnightEnterSphere(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -53,10 +28,10 @@ void AEnemyCharacter::OnKnightEnterSphere(UPrimitiveComponent* OverlappedCompone
 {
     if (!OtherActor || OtherActor == this) return;
 
-    AKnightCharacter* OtherKnight = Cast<AKnightCharacter>(OtherActor);
-    if (OtherKnight)
+    AKnightCharacter* Knight = Cast<AKnightCharacter>(OtherActor);
+    if (Knight)
     {
-        Target = OtherKnight;
+        Target = Knight;
     }
 }
 
@@ -72,6 +47,8 @@ void AEnemyCharacter::Attack()
 	 if(bIsAlive && bCanAttack && !bIsStunned){
 		bCanAttack = false;
 		bCanMove = false;
+
+	 	EnableAttackCollisionBox(true);
 	
 	 	GetAnimInstance()->PlayAnimationOverride(AttackAnim, FName("DefaultSlot"), 1.0f, 0.0f, AttackAnimDelegate);
 	 	GetWorldTimerManager().SetTimer(
@@ -130,28 +107,6 @@ void AEnemyCharacter::UpdateEnemyFacingDirection(float Direction)
 	}
 }
 
-void AEnemyCharacter::ApplyDamage(int Amount, float StunDuration)
-{
-	if(!bIsAlive) return;
-	Stun(StunDuration);
-	UpdateCurrentHP(CurrentHP - Amount);
-
-	if(CurrentHP <= 0)
-	{
-		UpdateCurrentHP(0);
-		HPText->SetHiddenInGame(true);
-		bIsAlive = false;
-		bCanMove = false;
-		bCanAttack = false;
-		GetAnimInstance()->JumpToNode(FName("JumpToDie"));
-		EnableAttackCollisionBox(false);
-	}
-	else
-	{
-		GetAnimInstance()->JumpToNode(FName("JumpToHit"));
-	}
-}
-
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -168,25 +123,3 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		}
 	}
 }
-
-void AEnemyCharacter::Stun(float Duration)
-{
-	bIsStunned = true;
-
-	bool bIsTimerActive = GetWorldTimerManager().IsTimerActive(StunTimer);
-	if(bIsTimerActive)
-	{
-		GetWorldTimerManager().ClearTimer(StunTimer);
-	}
-	
-	GetWorldTimerManager().SetTimer(StunTimer, this, &AEnemyCharacter::OnStunTimeout, 1.0f, false, Duration);
-	GetAnimInstance()->StopAllAnimationOverrides();
-	EnableAttackCollisionBox(false);
-}
-
-void AEnemyCharacter::OnStunTimeout() 
-{
-	bIsStunned = false;
-}
-
-

@@ -19,12 +19,6 @@ class SHADOWKNIGHT_API AEnemyCharacter : public ABaseCharacter
 
 public:
 	AEnemyCharacter();
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-	TObjectPtr<UTextRenderComponent> HPText;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	int CurrentHP = 100;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AttackCoolDown = 3.0f;
@@ -39,8 +33,6 @@ public:
 	float StopDistanceToTarget = 30.0f;
 	
 	FTimerHandle AttackCoolDownTimer;
-
-	void UpdateCurrentHP(int HP);
 
 	void Attack();
 	void OnAttackCoolDownTimeout();
@@ -61,10 +53,11 @@ public:
 	void OnStunTimeout();
 
 protected:
+	virtual void BeginPlay() override;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USphereComponent> ProximitySphere;
 	
-	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

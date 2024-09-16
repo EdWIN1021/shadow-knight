@@ -13,9 +13,6 @@ AEnemyCharacter::AEnemyCharacter()
 
 	AttackCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollisionBox"));
 	AttackCollisionBox->SetupAttachment(RootComponent);
-	
-	HPText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("HP"));
-	HPText ->SetupAttachment(RootComponent);
 }
 
 void AEnemyCharacter::BeginPlay()
@@ -68,12 +65,6 @@ void AEnemyCharacter::OnKnightLeaveSphere(UPrimitiveComponent* OverlappedCompone
 {
 	if (OtherActor == Target)
 		Target = nullptr;
-}
-
-void AEnemyCharacter::UpdateCurrentHP(int HP)
-{
-	CurrentHP = HP;
-	HPText->SetText(FText::FromString(FString::Printf(TEXT("HP: %d"), CurrentHP)));
 }
 
 void AEnemyCharacter::Attack()
@@ -157,7 +148,6 @@ void AEnemyCharacter::ApplyDamage(int Amount, float StunDuration)
 	}
 	else
 	{
-	
 		GetAnimInstance()->JumpToNode(FName("JumpToHit"));
 	}
 }
@@ -191,6 +181,7 @@ void AEnemyCharacter::Stun(float Duration)
 	
 	GetWorldTimerManager().SetTimer(StunTimer, this, &AEnemyCharacter::OnStunTimeout, 1.0f, false, Duration);
 	GetAnimInstance()->StopAllAnimationOverrides();
+	EnableAttackCollisionBox(false);
 }
 
 void AEnemyCharacter::OnStunTimeout() 

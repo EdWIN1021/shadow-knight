@@ -11,6 +11,9 @@ AEnemyCharacter::AEnemyCharacter()
 	ProximitySphere = CreateDefaultSubobject<USphereComponent>(TEXT("ProximitySphere"));
 	ProximitySphere->SetupAttachment(RootComponent);
 
+	AttackCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollisionBox"));
+	AttackCollisionBox->SetupAttachment(RootComponent);
+	
 	HPText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("HP"));
 	HPText ->SetupAttachment(RootComponent);
 }
@@ -22,10 +25,34 @@ void AEnemyCharacter::BeginPlay()
 	ProximitySphere->OnComponentEndOverlap.AddDynamic(this, &AEnemyCharacter::OnKnightLeaveSphere);
 	UpdateCurrentHP(CurrentHP);
 	AttackAnimDelegate.BindUObject(this, &AEnemyCharacter::OnAttackOverrideAnimEnd);
+	AttackCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnAttackCollisionBoxBeginOverlap);
+}
+
+void AEnemyCharacter::OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AKnightCharacter* Knight = Cast<AKnightCharacter>(OtherActor);
+	if(Knight)
+	{
+		// Knight->ApplyDamage(AttackDamage, AttackStunDuration);
+	}
+}
+
+void AEnemyCharacter::EnableAttackCollisionBox(bool Enabled)
+{
+	if(Enabled)
+	{
+		AttackCollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		AttackCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	}
+	else {
+		AttackCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		AttackCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	}
 }
 
 void AEnemyCharacter::OnKnightEnterSphere(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                          UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
     if (!OtherActor || OtherActor == this) return;
 
@@ -115,6 +142,7 @@ void AEnemyCharacter::UpdateEnemyFacingDirection(float Direction)
 void AEnemyCharacter::ApplyDamage(int Amount, float StunDuration)
 {
 	if(!bIsAlive) return;
+	Stun(StunDuration);
 	UpdateCurrentHP(CurrentHP - Amount);
 
 	if(CurrentHP <= 0)
@@ -125,10 +153,11 @@ void AEnemyCharacter::ApplyDamage(int Amount, float StunDuration)
 		bCanMove = false;
 		bCanAttack = false;
 		GetAnimInstance()->JumpToNode(FName("JumpToDie"));
+		EnableAttackCollisionBox(false);
 	}
 	else
 	{
-		Stun(StunDuration);
+	
 		GetAnimInstance()->JumpToNode(FName("JumpToHit"));
 	}
 }

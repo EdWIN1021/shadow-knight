@@ -32,6 +32,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<AKnightCharacter> Target;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite);
+	TObjectPtr<UBoxComponent> AttackCollisionBox;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float StopDistanceToTarget = 30.0f;
 	
@@ -62,6 +65,13 @@ protected:
 	TObjectPtr<USphereComponent> ProximitySphere;
 	
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+							 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+							 const FHitResult& SweepResult);
+	UFUNCTION(BlueprintCallable)
+	void EnableAttackCollisionBox(bool Enabled);
 
 private:
 	UFUNCTION()

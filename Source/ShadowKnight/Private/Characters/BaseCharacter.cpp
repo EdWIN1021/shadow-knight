@@ -3,14 +3,13 @@
 
 #include "Characters/BaseCharacter.h"
 #include "Characters/EnemyCharacter.h"
+#include "Engine/DamageEvents.h"
 
 ABaseCharacter::ABaseCharacter()
 {
 	AttackCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollisionBox"));
 	AttackCollisionBox->SetupAttachment(RootComponent);
-	
-	HPText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("HP"));
-	HPText ->SetupAttachment(RootComponent);
+
 }
 
 void ABaseCharacter::Stun(float Duration)
@@ -41,7 +40,6 @@ void ABaseCharacter::ApplyDamage(int Amount, float StunDuration)
 	if(CurrentHP <= 0)
 	{
 		UpdateCurrentHP(0);
-		HPText->SetHiddenInGame(true);
 		bIsAlive = false;
 		bCanMove = false;
 		bCanAttack = false;
@@ -54,10 +52,11 @@ void ABaseCharacter::ApplyDamage(int Amount, float StunDuration)
 	}
 }
 
-void ABaseCharacter::UpdateCurrentHP(int HP)
+
+
+void ABaseCharacter::UpdateCurrentHP(float HP)
 {
 	CurrentHP = HP;
-	HPText->SetText(FText::FromString(FString::Printf(TEXT("HP: %d"), CurrentHP)));
 }
 
 void ABaseCharacter::BeginPlay()
@@ -73,6 +72,12 @@ void ABaseCharacter::OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* Overl
 	if (HitCharacter && HitCharacter != this)
 	{
 		HitCharacter->ApplyDamage(AttackDamage, AttackStunDuration);
+		FDamageEvent TargetAttackedEvent;
+		HitCharacter->TakeDamage(
+			AttackDamage,
+			TargetAttackedEvent,
+			GetOwner()->GetInstigatorController(),
+			GetOwner());
 	}
 }
 

@@ -22,7 +22,10 @@ public:
 	ABaseCharacter();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
-	int CurrentHP = 100;
+	float CurrentHP = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
+	float MaxHP = 100.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	bool bIsAlive = true;
@@ -41,10 +44,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	bool bIsStunned = false;
-	
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-	TObjectPtr<UTextRenderComponent> HPText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite);
 	TObjectPtr<UBoxComponent> AttackCollisionBox;
@@ -55,7 +54,7 @@ public:
 
 	void ApplyDamage(int Amount, float StunDuration);
 	
-	void UpdateCurrentHP(int HP);
+	void UpdateCurrentHP(float HP);
 
 	virtual void BeginPlay() override;
 	

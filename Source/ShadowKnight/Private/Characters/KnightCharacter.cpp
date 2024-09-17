@@ -19,6 +19,7 @@ AKnightCharacter::AKnightCharacter()
 void AKnightCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	bHasKey = false;
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -57,6 +58,11 @@ void AKnightCharacter::CollectItem(EItemType Type)
 	}
 }
 
+void AKnightCharacter::OnRestartTimeout()
+{
+	 ShadowKnightGameInstance->RestartGame();
+}
+
 void AKnightCharacter::UpdateCurrentHP(float HP)
 {
 	Super::UpdateCurrentHP(HP);
@@ -71,6 +77,22 @@ void AKnightCharacter::UpdateCurrentHP(float HP)
 	}
 }
 
+void AKnightCharacter::ApplyDamage(int Amount, float StunDuration)
+{
+	Super::ApplyDamage(Amount, StunDuration);
+
+	if(CurrentHP <= 0)
+	{
+		GetWorldTimerManager().SetTimer(
+			RestartTimer,
+			this,
+			&AKnightCharacter::OnRestartTimeout,
+			1.0f,
+			false,
+			3.0f
+			);
+	}
+}
 
 
 void AKnightCharacter::Tick(float DeltaTime)

@@ -17,5 +17,11 @@ class SHADOWKNIGHT_API UShadowKnightGameInstance : public UGameInstance
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float PlayerHP = 100.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int CurrentLevel = 1;
+		
 	void SetPlayerHP(float HP);
+	void ChangeLevel(int level);
+	void RestartGame();
 };

@@ -51,12 +51,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bHasKey = false;
-	
+
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
+
+	FTimerHandle RestartTimer;
 	
 	void CollectItem(EItemType Type);
+
+	void OnRestartTimeout();
+	
 	virtual void UpdateCurrentHP(float HP) override;
+	virtual void ApplyDamage(int Amount, float StunDuration) override;
 	
 protected:
 	virtual void BeginPlay() override;

@@ -14,6 +14,9 @@
 /**
  * AKnightCharacter represents the player character with movement, attack, and animation capabilities.
  */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthChanged);
+
+
 UCLASS()
 class SHADOWKNIGHT_API AKnightCharacter : public ABaseCharacter
 {
@@ -45,6 +48,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase* PickUpSound;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHealthChanged OnHealthChanged;
 	
 	void CollectItem(EItemType Type);
 	virtual void UpdateCurrentHP(float HP) override;

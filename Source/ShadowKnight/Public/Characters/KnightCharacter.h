@@ -49,6 +49,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase* PickUpSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bHasKey = false;
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
 	

@@ -45,13 +45,13 @@ void AKnightCharacter::CollectItem(EItemType Type)
 	switch (Type)
 	{
 		case EItemType::Key:
-	
+			bHasKey = true;
 			break; 
 		
 	    case EItemType::HealthPotion:
 	    	UpdateCurrentHP(CurrentHP + 25);
 			break;
-
+	
 		default:
 			break;
 	}

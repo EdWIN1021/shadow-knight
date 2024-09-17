@@ -24,8 +24,8 @@ void ALevelExit::OnDoorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AKnightCharacter* Knight = Cast<AKnightCharacter>(OtherActor);
-	if(Knight && Knight->bIsAlive && bIsActive)
-	{
+	if(Knight && Knight->bIsAlive && bIsActive && Knight->bHasKey)
+	{	
 		Knight->Deactivate();
 		bIsActive = false;
 		GetWorldTimerManager().SetTimer(

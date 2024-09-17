@@ -68,7 +68,6 @@ void AKnightCharacter::UpdateCurrentHP(float HP)
 {
 	Super::UpdateCurrentHP(HP);
 
-	UE_LOG(LogTemp, Warning, TEXT("asdadasdasdasd"));
 	FString HealthStatus = FString::Printf(TEXT("Health changed to: %f"), 20.0f);
 	OnHealthChanged.Broadcast();
 	

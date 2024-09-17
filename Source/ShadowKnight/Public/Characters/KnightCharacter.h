@@ -57,12 +57,16 @@ public:
 
 	FTimerHandle RestartTimer;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsActive = true;
+	
 	void CollectItem(EItemType Type);
 
 	void OnRestartTimeout();
 	
 	virtual void UpdateCurrentHP(float HP) override;
 	virtual void ApplyDamage(int Amount, float StunDuration) override;
+	void Deactivate();
 	
 protected:
 	virtual void BeginPlay() override;

@@ -52,8 +52,6 @@ void ABaseCharacter::ApplyDamage(int Amount, float StunDuration)
 	}
 }
 
-
-
 void ABaseCharacter::UpdateCurrentHP(float HP)
 {
 	CurrentHP = HP;

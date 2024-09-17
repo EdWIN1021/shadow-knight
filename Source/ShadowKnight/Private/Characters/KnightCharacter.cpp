@@ -1,5 +1,6 @@
 #include "Characters/KnightCharacter.h"
 #include "Characters/EnemyCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -79,8 +80,10 @@ void AKnightCharacter::UpdateCurrentHP(float HP)
 
 void AKnightCharacter::ApplyDamage(int Amount, float StunDuration)
 {
-	Super::ApplyDamage(Amount, StunDuration);
+	if(!bIsActive) return;
 
+	Super::ApplyDamage(Amount, StunDuration);
+	
 	if(CurrentHP <= 0)
 	{
 		GetWorldTimerManager().SetTimer(
@@ -94,6 +97,16 @@ void AKnightCharacter::ApplyDamage(int Amount, float StunDuration)
 	}
 }
 
+void AKnightCharacter::Deactivate()
+{
+	if(bIsActive)
+	{
+		bIsActive = false;
+		bCanAttack = false;
+		bCanMove = false;
+		GetCharacterMovement()->StopMovementImmediately();
+	}
+}
 
 void AKnightCharacter::Tick(float DeltaTime)
 {
@@ -156,8 +169,11 @@ void AKnightCharacter::Attack(const FInputActionValue& Value)
 
 void AKnightCharacter::OnAttackAnimationComplete(bool Completed)
 {
-	bCanAttack = true;
-	bCanMove = true;
+	if(bIsAlive && bIsActive)
+	{
+		bCanAttack = true;
+		bCanMove = true;
+	}
 	EnableAttackCollisionBox(false);
 }
 

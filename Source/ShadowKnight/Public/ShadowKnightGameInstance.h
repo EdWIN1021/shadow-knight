@@ -23,5 +23,7 @@ public:
 		
 	void SetPlayerHP(float HP);
 	void ChangeLevel(int level);
+
+	UFUNCTION(BlueprintCallable)
 	void RestartGame();
 };

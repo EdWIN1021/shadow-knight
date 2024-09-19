@@ -48,6 +48,7 @@ void ABaseCharacter::ApplyDamage(int Amount, float StunDuration)
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("here"));
 		GetAnimInstance()->JumpToNode(FName("JumpToHit"));
 	}
 }

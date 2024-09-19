@@ -51,7 +51,7 @@ void AKnightCharacter::CollectItem(EItemType Type)
 			break; 
 		
 	    case EItemType::HealthPotion:
-	    	UpdateCurrentHP(CurrentHP + 25);
+	    	UpdateCurrentHP(100);
 			break;
 	
 		default:

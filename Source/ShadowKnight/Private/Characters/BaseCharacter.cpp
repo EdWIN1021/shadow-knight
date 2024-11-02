@@ -33,10 +33,11 @@ void ABaseCharacter::OnStunTimeout()
 	bIsStunned = false;
 }
 
-void ABaseCharacter::ApplyDamage(int Amount)
+void ABaseCharacter::ApplyDamage(float Amount)
 {
 	if(!bIsAlive) return;
 	Stun(AttackStunDuration);
+
   
 	if(Amount <= 0)
 	{

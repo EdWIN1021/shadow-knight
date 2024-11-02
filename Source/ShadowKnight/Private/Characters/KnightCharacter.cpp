@@ -72,13 +72,13 @@ void AKnightCharacter::UpdateCurrentHP(float HP)
 	}
 }
 
-void AKnightCharacter::ApplyDamage(int Amount)
+void AKnightCharacter::ApplyDamage(float Amount)
 {
 	if(!bIsActive) return;
 
 	Super::ApplyDamage(Amount);
 	
-	if(CurrentHP <= 0)
+	if(Amount <= 0)
 	{
 		GetWorldTimerManager().SetTimer(
 			RestartTimer,

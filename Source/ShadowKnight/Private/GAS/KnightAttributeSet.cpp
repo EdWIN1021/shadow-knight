@@ -17,15 +17,13 @@ void UKnightAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 
 	if(Data.EvaluatedData.Attribute == GetInComingDamageAttribute())
 	{
-		float Damage = GetInComingDamage();
-		SetInComingDamage(0.f);
-		SetHealth(GetHealth() - Damage);
-
 		if(Data.Target.AbilityActorInfo.IsValid() && Data.Target.AbilityActorInfo->AvatarActor.IsValid() )
 		{
+			float Damage = GetInComingDamage();
+			SetInComingDamage(0.f);
 			ABaseCharacter* TargetAvatarActor = Cast<ABaseCharacter>(Data.Target.AbilityActorInfo->AvatarActor.Get());
 			TargetAvatarActor->ApplyDamage(GetHealth() - Damage);
+			SetHealth(GetHealth() - Damage);
 		}
-
 	}
 }

@@ -59,7 +59,7 @@ public:
 	void Stun(float Duration);
 	void OnStunTimeout();
 
-	virtual void ApplyDamage(int Amount);
+	virtual void ApplyDamage(float Amount);
 	
 	virtual void UpdateCurrentHP(float HP);
 

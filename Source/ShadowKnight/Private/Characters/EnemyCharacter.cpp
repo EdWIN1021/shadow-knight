@@ -3,10 +3,15 @@
 
 #include "Characters/EnemyCharacter.h"
 #include "PaperZDAnimInstance.h"
+#include "GAS/KnightAbilitySystemComponent.h"
+#include "GAS/KnightAttributeSet.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
+	AbilitySystemComponent = CreateDefaultSubobject<UKnightAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AttributeSet = CreateDefaultSubobject<UKnightAttributeSet>(TEXT("AttributeSet"));
 	
 	ProximitySphere = CreateDefaultSubobject<USphereComponent>(TEXT("ProximitySphere"));
 	ProximitySphere->SetupAttachment(RootComponent);
@@ -15,12 +20,39 @@ AEnemyCharacter::AEnemyCharacter()
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	if(AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+		BindDelegates();
+		InitializeAttributes();
+	}
+	
 	ProximitySphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnKnightEnterSphere);
 	ProximitySphere->OnComponentEndOverlap.AddDynamic(this, &AEnemyCharacter::OnKnightLeaveSphere);
-
-
+	
 	AttackAnimDelegate.BindUObject(this, &AEnemyCharacter::OnAttackOverrideAnimEnd);
 	AttackCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnAttackCollisionBoxBeginOverlap);
+}
+
+void AEnemyCharacter::BindDelegates()
+{
+	if(const UKnightAttributeSet* AS = Cast<UKnightAttributeSet>(AttributeSet))
+	{
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AS->GetHealthAttribute()).AddLambda(
+			[this](const FOnAttributeChangeData Data)
+			{
+				OnHealthChanged.Broadcast(Data.NewValue);
+			}
+		);
+
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AS->GetMaxHealthAttribute()).AddLambda(
+			[this](const FOnAttributeChangeData Data)
+			{
+				OnMaxHealthChanged.Broadcast(Data.NewValue);
+			}
+		);
+	}
 }
 
 void AEnemyCharacter::OnKnightEnterSphere(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

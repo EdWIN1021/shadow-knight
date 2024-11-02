@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "PaperZDAnimInstance.h"
 #include "PaperZDCharacter.h"
+#include "AbilitySystemInterface.h"
+#include "GameplayEffect.h"
 #include "AnimSequences/PaperZDAnimSequence.h"
 #include "Components/BoxComponent.h"
 #include "BaseCharacter.generated.h"
@@ -12,8 +14,12 @@
 /**
  * 
  */
+
+class UAttributeSet;
+class UAbilitySystemComponent;
+
 UCLASS()
-class SHADOWKNIGHT_API ABaseCharacter : public APaperZDCharacter
+class SHADOWKNIGHT_API ABaseCharacter : public APaperZDCharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -58,9 +64,33 @@ public:
 	virtual void BeginPlay() override;
 	
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
+	UPROPERTY()
+	TObjectPtr<UAttributeSet> AttributeSet;
+
+	UAttributeSet* GetAttributeSet(){ return AttributeSet; }
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UGameplayEffect> InitialAttributes;
+
+	void InitializeAttributes() const;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UGameplayAbility> AttackAbility;
+	
+	void InitializeAbilities() const;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPaperZDAnimSequence> AttackAnim;
+
 	FZDOnAnimationOverrideEndSignature AttackAnimDelegate;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UGameplayEffect> DamageEffectClass;
 
 	UFUNCTION()
 	void OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

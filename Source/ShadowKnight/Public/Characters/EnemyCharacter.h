@@ -6,7 +6,7 @@
 #include "KnightCharacter.h"
 #include "Characters/BaseCharacter.h"
 #include "Components/SphereComponent.h"
-#include "Components/TextRenderComponent.h"
+#include "UI/KnightHUD.h"
 #include "EnemyCharacter.generated.h"
 
 /**
@@ -48,9 +48,17 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(BlueprintAssignable, Category="Enemy Attributes")
+	FOnAttributeChangedSignature OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable, Category="Enemy Attributes")
+	FOnAttributeChangedSignature OnMaxHealthChanged;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USphereComponent> ProximitySphere;
+
+	void BindDelegates();
 
 private:
 	UFUNCTION()

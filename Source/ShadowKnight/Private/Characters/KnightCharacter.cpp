@@ -1,18 +1,22 @@
 #include "Characters/KnightCharacter.h"
+
+#include "AbilitySystemComponent.h"
+#include "KnightGameplayTag.h"
 #include "Characters/EnemyCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/KnightPlayerController.h"
+#include "Player/KnightPlayerState.h"
+#include "UI/KnightHUD.h"
 
 
 AKnightCharacter::AKnightCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Create a SpringArm
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
  
-	// Attach the ViewCamera to SpringArm
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 }
@@ -21,15 +25,7 @@ void AKnightCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	bHasKey = false;
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(MappingContext, 0);
-		}
-	}
 
-	AttackAnimDelegate.BindUObject(this, &AKnightCharacter::OnAttackAnimationComplete);
 	AttackCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AKnightCharacter::AKnightCharacter::OnAttackCollisionBoxBeginOverlap);
 	EnableAttackCollisionBox(false);
 
@@ -68,7 +64,6 @@ void AKnightCharacter::UpdateCurrentHP(float HP)
 {
 	Super::UpdateCurrentHP(HP);
 
-	FString HealthStatus = FString::Printf(TEXT("Health changed to: %f"), 20.0f);
 	OnHealthChanged.Broadcast();
 	
 	if (ShadowKnightGameInstance)
@@ -107,50 +102,34 @@ void AKnightCharacter::Deactivate()
 	}
 }
 
+void AKnightCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if(AKnightPlayerState* PS = Cast<AKnightPlayerState>(GetPlayerState()))
+	{
+		PS->GetAbilitySystemComponent()->InitAbilityActorInfo(PS, this);
+		AbilitySystemComponent = PS->GetAbilitySystemComponent();
+		AttributeSet = PS->GetAttributeSet();
+
+		AKnightPlayerController* PC =  Cast<AKnightPlayerController>(GetController());
+		AKnightHUD* KnightHUD = Cast<AKnightHUD>(PC->GetHUD());
+		
+		KnightHUD->InitializedHUD();
+		KnightHUD->BindDelegates(AbilitySystemComponent, AttributeSet);
+
+		InitializeAttributes();
+		
+		InitializeAbilities();
+	}
+}
+
 void AKnightCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-void AKnightCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AKnightCharacter::Move);
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AKnightCharacter::Attack);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AKnightCharacter::BeginJump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AKnightCharacter::EndJump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Canceled, this, &AKnightCharacter::EndJump);
-	}
-}
-
-void AKnightCharacter::UpdateKnightFacingDirection(float Direction)
-{
-	if (Controller)
-	{
-		FRotator CurrentRotation = Controller->GetControlRotation();
-		if (Direction < 0.0f && CurrentRotation.Yaw != 180.0f)
-		{
-			Controller->SetControlRotation(FRotator(CurrentRotation.Pitch, 180.0f, CurrentRotation.Roll));
-		}
-		else if (Direction > 0.0f && CurrentRotation.Yaw != 0.0f)
-		{
-			Controller->SetControlRotation(FRotator(CurrentRotation.Pitch, 0.0f, CurrentRotation.Roll));
-		}
-	}
-}
-
-void AKnightCharacter::Move(const FInputActionValue& Value)
-{
-	if (bCanMove && bIsAlive && !bIsStunned)
-	{
-		AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value.Get<float>());
-		UpdateKnightFacingDirection(Value.Get<float>());
-	}
-}
-
-void AKnightCharacter::Attack(const FInputActionValue& Value)
+void AKnightCharacter::Attack()
 {
 	if (bIsAlive && bCanAttack && !bIsStunned)
 	{
@@ -159,14 +138,19 @@ void AKnightCharacter::Attack(const FInputActionValue& Value)
 
 		EnableAttackCollisionBox(true);
 
-		if (UPaperZDAnimInstance* AnimInstance = GetAnimInstance())
+		UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+		for(const FGameplayAbilitySpec& AbilitySpec: ASC->GetActivatableAbilities())
 		{
-			AnimInstance->PlayAnimationOverride(AttackAnim, FName("DefaultSlot"), 1.0f, 0.0f, AttackAnimDelegate);
+			if(AbilitySpec.DynamicAbilityTags.HasTagExact(KnightGameplayTags::Player_Ability_Attack))
+			{
+				ASC->TryActivateAbility(AbilitySpec.Handle);
+				return;
+			}
 		}
 	}
 }
 
-void AKnightCharacter::OnAttackAnimationComplete(bool Completed)
+void AKnightCharacter::OnAttackAnimationComplete()
 {
 	if(bIsAlive && bIsActive)
 	{
@@ -174,15 +158,4 @@ void AKnightCharacter::OnAttackAnimationComplete(bool Completed)
 		bCanMove = true;
 	}
 	EnableAttackCollisionBox(false);
-}
-
-void AKnightCharacter::BeginJump(const FInputActionValue& Value)
-{
-	if (bCanMove && bIsAlive)
-		Jump();
-}
-
-void AKnightCharacter::EndJump(const FInputActionValue& Value)
-{
-	StopJumping();
 }

@@ -2,14 +2,16 @@
 
 
 #include "Characters/BaseCharacter.h"
-#include "Characters/EnemyCharacter.h"
+#include "AbilitySystemComponent.h"
+#include "KnightGameplayTag.h"
 #include "Engine/DamageEvents.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GAS/KnightAttributeSet.h"
 
 ABaseCharacter::ABaseCharacter()
 {
 	AttackCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollisionBox"));
 	AttackCollisionBox->SetupAttachment(RootComponent);
-
 }
 
 void ABaseCharacter::Stun(float Duration)
@@ -64,19 +66,52 @@ void ABaseCharacter::BeginPlay()
 	UpdateCurrentHP(CurrentHP);
 }
 
+UAbilitySystemComponent* ABaseCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
+void ABaseCharacter::InitializeAttributes() const
+{
+	if(GetAbilitySystemComponent() && InitialAttributes)
+	{
+		const FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+		const FGameplayEffectSpecHandle  SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(InitialAttributes, 1.0f, ContextHandle);
+		GetAbilitySystemComponent()->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+	}
+}
+
+void ABaseCharacter::InitializeAbilities() const
+{
+	FGameplayAbilitySpec AbilitySpec(AttackAbility);
+	AbilitySpec.SourceObject = AbilitySystemComponent->GetAvatarActor();
+	AbilitySpec.DynamicAbilityTags.AddTag(KnightGameplayTags::Player_Ability_Attack);
+	AbilitySystemComponent->GiveAbility(AbilitySpec);
+}
+
 void ABaseCharacter::OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ABaseCharacter* HitCharacter = Cast<ABaseCharacter>(OtherActor);
 	if (HitCharacter && HitCharacter != this)
 	{
-		HitCharacter->ApplyDamage(AttackDamage, AttackStunDuration);
-		FDamageEvent TargetAttackedEvent;
-		HitCharacter->TakeDamage(
-			AttackDamage,
-			TargetAttackedEvent,
-			GetOwner()->GetInstigatorController(),
-			GetOwner());
+		UAbilitySystemComponent* SourceASC = GetAbilitySystemComponent();
+		UKnightAttributeSet* SourceAS =  Cast<UKnightAttributeSet>(GetAttributeSet());
+		FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, 1, SourceASC->MakeEffectContext());
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, KnightGameplayTags::Damage, SourceAS->GetStrength());
+
+		if(UAbilitySystemComponent* TargetASC = HitCharacter->GetAbilitySystemComponent())
+		{
+			TargetASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		};
+		
+		// HitCharacter->ApplyDamage(AttackDamage, AttackStunDuration);
+		// FDamageEvent TargetAttackedEvent;
+		// HitCharacter->TakeDamage(
+		// 	AttackDamage,
+		// 	TargetAttackedEvent,
+		// 	GetOwner()->GetInstigatorController(),
+		// 	GetOwner());
 	}
 }
 

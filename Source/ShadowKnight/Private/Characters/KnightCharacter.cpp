@@ -80,14 +80,7 @@ void AKnightCharacter::ApplyDamage(float Amount)
 	
 	if(Amount <= 0)
 	{
-		GetWorldTimerManager().SetTimer(
-			RestartTimer,
-			this,
-			&AKnightCharacter::OnRestartTimeout,
-			1.0f,
-			false,
-			3.0f
-			);
+		OnRestartTimeout();
 	}
 }
 

@@ -3,3 +3,13 @@
 
 #include "Characters/BossCharacter.h"
 
+
+void ABossCharacter::ApplyDamage(float Amount)
+{
+	Super::ApplyDamage(Amount);
+
+	if(Amount <= 0 )
+	{
+		OnDeath.Broadcast();
+	}
+}

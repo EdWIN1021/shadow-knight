@@ -4,6 +4,7 @@
 #include "KnightGameplayTag.h"
 #include "Characters/EnemyCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GAS/KnightAttributeSet.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/KnightPlayerController.h"
 #include "Player/KnightPlayerState.h"
@@ -32,13 +33,15 @@ void AKnightCharacter::BeginPlay()
 	ShadowKnightGameInstance = Cast<UShadowKnightGameInstance>(GetGameInstance());
 	if(ShadowKnightGameInstance)
 	{
-		CurrentHP = ShadowKnightGameInstance->PlayerHP;
+		UKnightAttributeSet* AS = Cast<UKnightAttributeSet>(AttributeSet);
+		AS->SetHealth(ShadowKnightGameInstance->PlayerHP);
 	}
 }
 
 void AKnightCharacter::CollectItem(EItemType Type)
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), PickUpSound);
+	UKnightAttributeSet* AS = Cast<UKnightAttributeSet>(AttributeSet);
 
 	switch (Type)
 	{
@@ -47,7 +50,7 @@ void AKnightCharacter::CollectItem(EItemType Type)
 			break; 
 		
 	    case EItemType::HealthPotion:
-	    	UpdateCurrentHP(100);
+	    	AS->SetHealth(100);
 			break;
 	
 		default:
@@ -58,18 +61,6 @@ void AKnightCharacter::CollectItem(EItemType Type)
 void AKnightCharacter::OnRestartTimeout()
 {
 	 ShadowKnightGameInstance->RestartGame();
-}
-
-void AKnightCharacter::UpdateCurrentHP(float HP)
-{
-	Super::UpdateCurrentHP(HP);
-
-	OnHealthChanged.Broadcast();
-	
-	if (ShadowKnightGameInstance)
-	{
-		ShadowKnightGameInstance->SetPlayerHP(CurrentHP);
-	}
 }
 
 void AKnightCharacter::ApplyDamage(float Amount)

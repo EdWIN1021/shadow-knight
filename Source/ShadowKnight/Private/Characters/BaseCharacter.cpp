@@ -58,15 +58,9 @@ void ABaseCharacter::ApplyDamage(float Amount)
 	}
 }
 
-void ABaseCharacter::UpdateCurrentHP(float HP)
-{
-	CurrentHP = HP;
-}
-
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	UpdateCurrentHP(CurrentHP);
 
 	DeathAnimDelegate.BindUObject(this, &ThisClass::OnDeadOverrideAnimEnd);
 }

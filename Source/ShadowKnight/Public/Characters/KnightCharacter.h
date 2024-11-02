@@ -45,8 +45,6 @@ public:
 
 	void OnRestartTimeout();
 	
-	virtual void UpdateCurrentHP(float HP) override;
-	
 	virtual void ApplyDamage(float Amount) override;
 
 	UFUNCTION(BlueprintCallable)

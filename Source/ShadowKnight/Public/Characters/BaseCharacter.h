@@ -26,17 +26,6 @@ class SHADOWKNIGHT_API ABaseCharacter : public APaperZDCharacter, public IAbilit
 public:
 	ABaseCharacter();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
-	float CurrentHP = 100.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
-	float MaxHP = 100.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	int AttackDamage = 25;
-
-
-	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	bool bIsAlive = true;
 
@@ -61,8 +50,6 @@ public:
 
 	virtual void ApplyDamage(float Amount);
 	
-	virtual void UpdateCurrentHP(float HP);
-
 	virtual void BeginPlay() override;
 	
 protected:

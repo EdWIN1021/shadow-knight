@@ -3,6 +3,9 @@
 
 #include "GAS/KnightAttributeSet.h"
 #include "GameplayEffectExtension.h"
+#include "Characters/BaseCharacter.h"
+
+class ABaseCharacter;
 
 UKnightAttributeSet::UKnightAttributeSet()
 {
@@ -16,14 +19,13 @@ void UKnightAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 	{
 		float Damage = GetInComingDamage();
 		SetInComingDamage(0.f);
+		SetHealth(GetHealth() - Damage);
 
-		if(GetHealth() - Damage <= 0.f)
+		if(Data.Target.AbilityActorInfo.IsValid() && Data.Target.AbilityActorInfo->AvatarActor.IsValid() )
 		{
-		
+			ABaseCharacter* TargetAvatarActor = Cast<ABaseCharacter>(Data.Target.AbilityActorInfo->AvatarActor.Get());
+			TargetAvatarActor->ApplyDamage(GetHealth() - Damage);
 		}
-		else
-		{
-			SetHealth(GetHealth() - Damage);
-		}
+
 	}
 }

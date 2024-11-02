@@ -72,11 +72,11 @@ void AKnightCharacter::UpdateCurrentHP(float HP)
 	}
 }
 
-void AKnightCharacter::ApplyDamage(int Amount, float StunDuration)
+void AKnightCharacter::ApplyDamage(int Amount)
 {
 	if(!bIsActive) return;
 
-	Super::ApplyDamage(Amount, StunDuration);
+	Super::ApplyDamage(Amount);
 	
 	if(CurrentHP <= 0)
 	{

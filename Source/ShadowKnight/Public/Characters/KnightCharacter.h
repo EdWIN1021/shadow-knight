@@ -47,7 +47,7 @@ public:
 	
 	virtual void UpdateCurrentHP(float HP) override;
 	
-	virtual void ApplyDamage(int Amount, float StunDuration) override;
+	virtual void ApplyDamage(int Amount) override;
 
 	UFUNCTION(BlueprintCallable)
 	void Deactivate();

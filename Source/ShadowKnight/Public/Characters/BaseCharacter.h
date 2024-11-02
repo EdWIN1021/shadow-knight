@@ -31,6 +31,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
 	float MaxHP = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	int AttackDamage = 25;
+
+
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	bool bIsAlive = true;
@@ -40,9 +45,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	bool bCanMove = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	int AttackDamage = 25;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float AttackStunDuration = 0.3f;
@@ -57,7 +59,7 @@ public:
 	void Stun(float Duration);
 	void OnStunTimeout();
 
-	virtual void ApplyDamage(int Amount, float StunDuration);
+	virtual void ApplyDamage(int Amount);
 	
 	virtual void UpdateCurrentHP(float HP);
 
@@ -88,6 +90,13 @@ protected:
 	TObjectPtr<UPaperZDAnimSequence> AttackAnim;
 
 	FZDOnAnimationOverrideEndSignature AttackAnimDelegate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UPaperZDAnimSequence> DeathAnim;
+
+	FZDOnAnimationOverrideEndSignature DeathAnimDelegate;
+
+	void OnDeadOverrideAnimEnd(bool Completed);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> DamageEffectClass;

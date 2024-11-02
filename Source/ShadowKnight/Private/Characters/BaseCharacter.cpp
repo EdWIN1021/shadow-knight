@@ -33,24 +33,26 @@ void ABaseCharacter::OnStunTimeout()
 	bIsStunned = false;
 }
 
-void ABaseCharacter::ApplyDamage(int Amount, float StunDuration)
+void ABaseCharacter::ApplyDamage(int Amount)
 {
 	if(!bIsAlive) return;
-	Stun(StunDuration);
-	UpdateCurrentHP(CurrentHP - Amount);
+	Stun(AttackStunDuration);
   
-	if(CurrentHP <= 0)
+	if(Amount <= 0)
 	{
-		UpdateCurrentHP(0);
 		bIsAlive = false;
 		bCanMove = false;
 		bCanAttack = false;
-		GetAnimInstance()->JumpToNode(FName("JumpToDie"));
+		GetAnimInstance()->PlayAnimationOverride(
+			DeathAnim, "DefaultSlot",
+			1.0f,
+			0.0f, 
+			DeathAnimDelegate
+		);
 		EnableAttackCollisionBox(false);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("here"));
 		GetAnimInstance()->JumpToNode(FName("JumpToHit"));
 	}
 }
@@ -64,6 +66,8 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	UpdateCurrentHP(CurrentHP);
+
+	DeathAnimDelegate.BindUObject(this, &ThisClass::OnDeadOverrideAnimEnd);
 }
 
 UAbilitySystemComponent* ABaseCharacter::GetAbilitySystemComponent() const
@@ -89,6 +93,11 @@ void ABaseCharacter::InitializeAbilities() const
 	AbilitySystemComponent->GiveAbility(AbilitySpec);
 }
 
+void ABaseCharacter::OnDeadOverrideAnimEnd(bool Completed)
+{
+	if(Completed) Destroy();
+}
+
 void ABaseCharacter::OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -104,14 +113,6 @@ void ABaseCharacter::OnAttackCollisionBoxBeginOverlap(UPrimitiveComponent* Overl
 		{
 			TargetASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 		};
-		
-		// HitCharacter->ApplyDamage(AttackDamage, AttackStunDuration);
-		// FDamageEvent TargetAttackedEvent;
-		// HitCharacter->TakeDamage(
-		// 	AttackDamage,
-		// 	TargetAttackedEvent,
-		// 	GetOwner()->GetInstigatorController(),
-		// 	GetOwner());
 	}
 }
 
